@@ -13,9 +13,17 @@
   </head>
   <body>
     <!-- Так добавляются фрагменты в главные HTML-файлы страниц. -->
-    <include src="./partials/example.html"></include>
+    <!--    <include src="./partials/example.html"></include>-->
+    <include src="./partials/header.html"></include>
+    <main class="main">
+      <section class="section">
+        <div class="gallery">
+        </div>
+        <button type="button" class="load-more is-hidden" id="loadMore">Load more</button>
+      </section>
+    </main>
 
     <!-- Скрипт идёт последним в разметке. В нём уже подключен главный SASS-файл. -->
-    <script src="./index.js"></script>
+    <script src="./index.js" defer></script>
   </body>
 </html>
