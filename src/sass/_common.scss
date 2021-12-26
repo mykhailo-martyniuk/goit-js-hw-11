@@ -19,12 +19,17 @@ li {
   margin: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 
 .main {
   margin-top: 50px;
 }
 .section{
   text-align: center;
+  padding: 40px;
 }
 .is-hidden {
   opacity: 0;

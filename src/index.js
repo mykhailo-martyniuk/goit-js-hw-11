@@ -1,120 +1,79 @@
 import './sass/main.scss';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 import { getPhotos } from './api';
+import { generateGallery, getQueryText, State } from './tools';
 
-const refiningPhotoData = rawData => {
-  const arrOfPhotos = rawData.hits.map(el => ({
-    smallImgURL: el.webformatURL,
-    largeImgURL: el.largeImageURL,
-    alt: el.tags,
-    likes: el.likes,
-    views: el.views,
-    comments: el.comments,
-    downloads: el.downloads,
-  }));
-  console.log('refiningPhotoData: ', arrOfPhotos);
-  return { total: rawData.totalHits, arrOfPhotos };
+const toggleLoading = () => {
+  refs.loading.classList.toggle('is-hidden');
 };
 
-const generatePhotoEl = ({
-  smallImgURL,
-  largeImgURL,
-  alt,
-  likes,
-  views,
-  comments,
-  downloads,
-}) => {
-  return `
-  <div class="photo-card">
-    <img src="${smallImgURL}" alt="${alt}" loading="lazy" width="300px"/>
-    <ul class="info">
-      <li class="info-item">
-        <b class="title">Likes</b>
-        <p class="count">${likes}</p>
-      </li>
-      <li class="info-item">
-        <b class="title">Views</b>
-        <p class="count">${views}</p>
-      </li>
-      <li class="info-item">
-        <b class="title">Comments</b>
-        <p class="count">${comments}</p>
-      </li>
-      <li class="info-item">
-        <b class="title">Downloads</b>
-        <p class="count">${downloads}</p>
-      </li>
-    </ul>
-  </div>`;
-};
-
-const generateGallery = photos => {
-  return photos.map(photo => generatePhotoEl(photo)).join('');
-};
-
-const getQueryText = str => {
-  return str
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/ /g, '+')
-    .toLowerCase();
-};
-
+const state = new State(1, false, toggleLoading);
+const lightbox = new SimpleLightbox('.gallery a', {});
 const refs = {
-  loadMore: document.querySelector('#loadMore'),
+  loading: document.querySelector('#loading'),
   gallery: document.querySelector('.gallery'),
   form: document.querySelector('#search-form'),
   input: document.querySelector('#input'),
 };
 
-const state = { page: 1 };
-
-const createMarkdown = async () => {
-  const data = await getPhotos(
-    getQueryText(refs.input.value),
-    state.page,
-  );
-  const { arrOfPhotos: clearedData } = refiningPhotoData(data);
-  const markdown = generateGallery(clearedData);
-
-  return markdown;
-};
-
 const handlerForm = async e => {
   e.preventDefault();
-  refs.loadMore.classList.add('is-hidden');
+  state.loading = true;
   state.page = 1;
-  const data = await getPhotos(
+  const { arrOfPhotos: data, total } = await getPhotos(
     getQueryText(refs.input.value),
     state.page,
   );
-  const { arrOfPhotos: clearedData, total } = refiningPhotoData(data);
   if (total) {
-    const markdown = generateGallery(clearedData);
+    const markdown = generateGallery(data);
     Notify.success(`Hooray! We found ${total} images.`);
 
     refs.gallery.innerHTML = markdown;
-    refs.loadMore.classList.remove('is-hidden');
+    lightbox.refresh();
     state.page++;
   } else {
+    refs.gallery.innerHTML = '';
     Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.',
     );
   }
-
-  console.log('formData:', refs.input.value);
-  console.log('formData2:', getQueryText(refs.input.value));
+  state.loading = false;
 };
 
-const handlerLoadMore = async () => {
-  const markdown = await createMarkdown();
+const loadMore = async () => {
+  state.loading = true;
+
+  const { arrOfPhotos: data } = await getPhotos(
+    getQueryText(refs.input.value),
+    state.page,
+  );
+
+  const markdown = generateGallery(data);
   refs.gallery.insertAdjacentHTML('beforeend', markdown);
+
+  lightbox.refresh();
+
+  const { height: cardHeight } =
+    refs.gallery.firstElementChild.getBoundingClientRect();
+  window.scrollBy(0, cardHeight * 2);
+
   state.page++;
+  state.loading = false;
 };
 
+const infinityLoad = async () => {
+  const contentHeight = refs.gallery.offsetHeight;
+  const yOffset = window.pageYOffset;
+  const windowHeight = window.innerHeight;
+  const end = yOffset + windowHeight;
+
+  if (end >= contentHeight) {
+    await loadMore();
+  }
+};
+
+window.addEventListener('scroll', infinityLoad);
 refs.form.addEventListener('submit', handlerForm);
-refs.loadMore.addEventListener('click', handlerLoadMore);

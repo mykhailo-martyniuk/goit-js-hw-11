@@ -1,18 +1,40 @@
 .photo-card {
+  width: 300px;
+  position: relative;
+
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  &:hover {
+    box-shadow: rgba(0, 0, 0, 0.12) 3px 3px 3px 0px,
+      rgba(0, 0, 0, 0.14) 3px 3px 3px 0px;
+  }
   .info {
+    width: 100%;
     display: flex;
+    justify-content: space-around;
+    padding: 10px 5px;
+
+    border-left: 1px solid grey;
+    border-right: 1px solid grey;
+    border-bottom: 1px solid grey;
+
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
   }
   .info-item {
-
   }
-  .title{
-
+  .title {
   }
-  .count{
+  .count {
+  }
+  .img {
+    display: block;
+    height: 220px;
+    object-fit: cover;
   }
 }
 
-.photo-card{
+.photo-card {
   margin-left: 30px;
   margin-top: 30px;
 }
