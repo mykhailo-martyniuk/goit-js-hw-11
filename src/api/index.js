@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-const API_KEY = '24981883-cdf10776969878d5abe2cfe80';
-const PER_PAGE = 40;
+import { API_KEY, PER_PAGE } from '../tools/constans';
 
 const axiosInstance = axios.create({
   baseURL: 'https://pixabay.com/api',

@@ -1,6 +1,7 @@
-export function State(pageInit, load, loadingCallback) {
+export function State(page, load, total, loadingCallback) {
   let loading = load;
-  let page = pageInit;
+  this.page = page;
+  this.total = total
 
   Object.defineProperty(this, 'loading', {
     get() {
@@ -11,14 +12,7 @@ export function State(pageInit, load, loadingCallback) {
       loading = val;
     },
   });
-  Object.defineProperty(this, 'page', {
-    get() {
-      return page;
-    },
-    set(val) {
-      page = val;
-    },
-  });
+
 }
 
 const generatePhotoEl = ({
@@ -66,3 +60,9 @@ export const getQueryText = str => {
     .replace(/ /g, '+')
     .toLowerCase();
 };
+
+export const delay = async (ms) => {
+  return await new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}
